@@ -239,18 +239,19 @@ ldap_add_schemas() {
 #   None
 #########################
 ldap_create_tree() {
-    info "Creating LDAP default tree"
-    local dc=""
-    local o="example"
-    read -r -a root <<< "$(tr ',;' ' ' <<< "${LDAP_ROOT}")"
-    for attr in "${root[@]}"; do
-        if [[ $attr == dc=* ]] && [[ -z "$dc" ]]; then
-            dc="${attr:3}"
-        elif [[ $attr == o=* ]] && [[ $o == "example" ]]; then
-            o="${attr:2}"
-        fi
-    done
-    cat > "${LDAP_SHARE_DIR}/tree.ldif" << EOF
+    if [[ -z "${LDAP_CUSTOM_TREE_FILE}" ]]; then
+        info "Creating LDAP default tree"
+        local dc=""
+        local o="example"
+        read -r -a root <<< "$(tr ',;' ' ' <<< "${LDAP_ROOT}")"
+        for attr in "${root[@]}"; do
+            if [[ $attr == dc=* ]] && [[ -z "$dc" ]]; then
+                dc="${attr:3}"
+            elif [[ $attr == o=* ]] && [[ $o == "example" ]]; then
+                o="${attr:2}"
+            fi
+        done
+        cat > "${LDAP_SHARE_DIR}/tree.ldif" << EOF
 # Root creation
 dn: $LDAP_ROOT
 objectClass: dcObject
@@ -263,11 +264,11 @@ objectClass: organizationalUnit
 ou: users
 
 EOF
-    read -r -a users <<< "$(tr ',;' ' ' <<< "${LDAP_USERS}")"
-    read -r -a passwords <<< "$(tr ',;' ' ' <<< "${LDAP_PASSWORDS}")"
-    local index=0
-    for user in "${users[@]}"; do
-        cat >> "${LDAP_SHARE_DIR}/tree.ldif" << EOF
+        read -r -a users <<< "$(tr ',;' ' ' <<< "${LDAP_USERS}")"
+        read -r -a passwords <<< "$(tr ',;' ' ' <<< "${LDAP_PASSWORDS}")"
+        local index=0
+        for user in "${users[@]}"; do
+            cat >> "${LDAP_SHARE_DIR}/tree.ldif" << EOF
 # User $user creation
 dn: ${user/#/cn=},${LDAP_USER_DC/#/ou=},${LDAP_ROOT}
 cn: User$((index + 1 ))
@@ -282,9 +283,9 @@ gidNumber: $((index + 1000 ))
 homeDirectory: /home/${user}
 
 EOF
-        index=$((index + 1 ))
-    done
-    cat >> "${LDAP_SHARE_DIR}/tree.ldif" << EOF
+            index=$((index + 1 ))
+        done
+        cat >> "${LDAP_SHARE_DIR}/tree.ldif" << EOF
 # Group creation
 dn: ${LDAP_GROUP/#/ou=},${LDAP_USER_DC/#/ou=},${LDAP_ROOT}
 cn: $LDAP_GROUP
@@ -292,7 +293,11 @@ objectClass: groupOfNames
 member: ${users[@]/#/cn=},${LDAP_USER_DC/#/ou=},${LDAP_ROOT}
 
 EOF
-    debug_execute ldapadd -f "${LDAP_SHARE_DIR}/tree.ldif" -H "ldapi:///" -D "$LDAP_ADMIN_DN" -w "$LDAP_ADMIN_PASSWORD"
+        export LDAP_DEFAULT_TREE_PATH="${LDAP_SHARE_DIR}/tree.ldif"
+    else
+        export LDAP_DEFAULT_TREE_PATH="${LDAP_CUSTOM_TREE_FILE}"
+    fi
+    debug_execute ldapadd -f "${LDAP_DEFAULT_TREE_PATH}" -H "ldapi:///" -D "$LDAP_ADMIN_DN" -w "$LDAP_ADMIN_PASSWORD"
 }
 
 ########################
