@@ -298,8 +298,9 @@ EOF
         info "Using custom tree file"
         export LDAP_DEFAULT_TREE_PATH="${LDAP_CUSTOM_TREE_FILE}"
     fi
-    info "Creating LDAP default tree from ${LDAP_DEFAULT_TREE_PATH}"
-    debug_execute ldapadd -f "${LDAP_DEFAULT_TREE_PATH}" -H "ldapi:///" -D "$LDAP_ADMIN_DN" -w "$LDAP_ADMIN_PASSWORD"
+    info "Creating LDAP default tree from $LDAP_DEFAULT_TREE_PATH"
+    debug_execute ldapadd -f "$LDAP_DEFAULT_TREE_PATH" -H "ldapi:///" -D "$LDAP_ADMIN_DN" -w "$LDAP_ADMIN_PASSWORD"
+    info "Created LDAP default tree"
 }
 
 ########################
