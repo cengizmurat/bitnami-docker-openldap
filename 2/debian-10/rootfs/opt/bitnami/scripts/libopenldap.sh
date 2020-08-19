@@ -240,7 +240,7 @@ ldap_add_schemas() {
 #########################
 ldap_create_tree() {
     if [[ -z "${LDAP_CUSTOM_TREE_FILE}" ]]; then
-        info "Creating LDAP default tree"
+        info "Generating LDAP tree file"
         local dc=""
         local o="example"
         read -r -a root <<< "$(tr ',;' ' ' <<< "${LDAP_ROOT}")"
@@ -295,8 +295,10 @@ member: ${users[@]/#/cn=},${LDAP_USER_DC/#/ou=},${LDAP_ROOT}
 EOF
         export LDAP_DEFAULT_TREE_PATH="${LDAP_SHARE_DIR}/tree.ldif"
     else
+        info "Using custom tree file"
         export LDAP_DEFAULT_TREE_PATH="${LDAP_CUSTOM_TREE_FILE}"
     fi
+    info "Creating LDAP default tree at ${LDAP_DEFAULT_TREE_PATH}"
     debug_execute ldapadd -f "${LDAP_DEFAULT_TREE_PATH}" -H "ldapi:///" -D "$LDAP_ADMIN_DN" -w "$LDAP_ADMIN_PASSWORD"
 }
 
