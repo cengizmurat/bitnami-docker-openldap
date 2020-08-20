@@ -308,6 +308,7 @@ EOF
     cat "$LDAP_DEFAULT_TREE_PATH"
     
     info "Creating LDAP default tree"
+    echo "ldapadd -f \"$LDAP_DEFAULT_TREE_PATH\" -H \"ldapi:///\" -D \"$LDAP_ADMIN_DN\" -w \"$LDAP_ADMIN_PASSWORD\""
     debug_execute ldapadd -f "$LDAP_DEFAULT_TREE_PATH" -H "ldapi:///" -D "$LDAP_ADMIN_DN" -w "$LDAP_ADMIN_PASSWORD"
     info "Created LDAP default tree"
 }
