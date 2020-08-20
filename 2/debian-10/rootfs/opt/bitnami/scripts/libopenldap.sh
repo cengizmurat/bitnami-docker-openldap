@@ -299,12 +299,12 @@ member: ${users[@]/#/cn=},${LDAP_USER_DC/#/ou=},${LDAP_ROOT}
 
 EOF
         info "Generated LDAP tree file"
-        export LDAP_DEFAULT_TREE_PATH="${LDAP_SHARE_DIR}/tree.ldif"
     else
-        info "Using custom tree file"
-        export LDAP_DEFAULT_TREE_PATH="${LDAP_CUSTOM_TREE_FILE}"
+        info "Using custom tree file at ${LDAP_CUSTOM_TREE_FILE}"
+        cp "${LDAP_CUSTOM_TREE_FILE}" "${LDAP_SHARE_DIR}/tree.ldif"
     fi
-    info "Creating LDAP default tree from $LDAP_DEFAULT_TREE_PATH"
+    export LDAP_DEFAULT_TREE_PATH="${LDAP_SHARE_DIR}/tree.ldif"
+    info "Creating LDAP default tree"
     debug_execute ldapadd -f "$LDAP_DEFAULT_TREE_PATH" -H "ldapi:///" -D "$LDAP_ADMIN_DN" -w "$LDAP_ADMIN_PASSWORD"
     info "Created LDAP default tree"
 }
