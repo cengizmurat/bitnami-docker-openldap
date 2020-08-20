@@ -144,6 +144,7 @@ ldap_start_bg() {
         info "Starting OpenLDAP server in background"
         am_i_root && flags=("-u" "$LDAP_DAEMON_USER" "${flags[@]}")
         debug_execute slapd "${flags[@]}"
+        info "Started OpenLDAP server in background"
     fi
 }
 
@@ -176,6 +177,8 @@ ldap_create_online_configuration() {
 
     ! am_i_root && replace_in_file "${LDAP_SHARE_DIR}/slapd.ldif" "uidNumber=0" "uidNumber=$(id -u)"
     debug_execute slapadd -F "$LDAP_ONLINE_CONF_DIR" -n 0 -l "${LDAP_SHARE_DIR}/slapd.ldif"
+    
+    info "Created LDAP online configuration"
 }
 
 ########################
@@ -211,6 +214,7 @@ replace: olcAccess
 olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external, cn=auth" read by dn.base="${LDAP_ADMIN_DN}" read by * none
 EOF
     debug_execute ldapmodify -Y EXTERNAL -H "ldapi:///" -f "${LDAP_SHARE_DIR}/admin.ldif"
+    info "Configured LDAP credentials for admin user"
 }
 
 ########################
@@ -227,6 +231,7 @@ ldap_add_schemas() {
     debug_execute ldapadd -Y EXTERNAL -H "ldapi:///" -f "${LDAP_CONF_DIR}/schema/cosine.ldif"
     debug_execute ldapadd -Y EXTERNAL -H "ldapi:///" -f "${LDAP_CONF_DIR}/schema/inetorgperson.ldif"
     debug_execute ldapadd -Y EXTERNAL -H "ldapi:///" -f "${LDAP_CONF_DIR}/schema/nis.ldif"
+    info "Added LDAP extra schemas"
 }
 
 ########################
@@ -293,6 +298,7 @@ objectClass: groupOfNames
 member: ${users[@]/#/cn=},${LDAP_USER_DC/#/ou=},${LDAP_ROOT}
 
 EOF
+        info "Generated LDAP tree file"
         export LDAP_DEFAULT_TREE_PATH="${LDAP_SHARE_DIR}/tree.ldif"
     else
         info "Using custom tree file"
