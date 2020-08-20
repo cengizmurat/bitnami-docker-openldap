@@ -304,6 +304,9 @@ EOF
         cp "${LDAP_CUSTOM_TREE_FILE}" "${LDAP_SHARE_DIR}/tree.ldif"
     fi
     export LDAP_DEFAULT_TREE_PATH="${LDAP_SHARE_DIR}/tree.ldif"
+    echo "cat \"$LDAP_DEFAULT_TREE_PATH\""
+    cat "$LDAP_DEFAULT_TREE_PATH"
+    
     info "Creating LDAP default tree"
     debug_execute ldapadd -f "$LDAP_DEFAULT_TREE_PATH" -H "ldapi:///" -D "$LDAP_ADMIN_DN" -w "$LDAP_ADMIN_PASSWORD"
     info "Created LDAP default tree"
